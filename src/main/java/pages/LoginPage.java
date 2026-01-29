@@ -58,7 +58,7 @@ public class LoginPage {
         }
     }
 
-    // ✅ NEW METHODS FOR ASSERTION SUPPORT
+    // NEW METHODS FOR ASSERTION SUPPORT
 
     public boolean isOnInventoryPage() {
         wait.until(ExpectedConditions.urlContains("inventory.html"));
