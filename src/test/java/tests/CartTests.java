@@ -9,38 +9,101 @@ import pages.LoginPage;
 
 public class CartTests extends BaseTest {
 
-    @BeforeMethod
-    public void loginToInventory() throws InterruptedException {
-        driver.get("https://www.saucedemo.com/");
-        LoginPage loginPage = new LoginPage(driver);
-        loginPage.enterUsername("standard_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "Login failed in setup");
+    private InventoryPage inventoryPage;
 
+    @BeforeMethod
+    public void loginToInventory() {
+
+        driver.get("https://www.saucedemo.com/");
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login("standard_user", "secret_sauce");
+
+        Assert.assertTrue(loginPage.isOnInventoryPage());
+
+        inventoryPage = new InventoryPage(driver);
     }
 
     @Test
     public void cart_shouldShowAddedItem() {
-        InventoryPage inventoryPage = new InventoryPage(driver);
+
         inventoryPage.addToCart("Sauce Labs Backpack");
-        Assert.assertEquals(inventoryPage.getCartBadgeCount(), 1, "Cart badge not 1");
+
+        Assert.assertEquals(
+                inventoryPage.getCartBadgeCount(),
+                1
+        );
 
         CartPage cartPage = inventoryPage.goToCart();
-        Assert.assertTrue(cartPage.isLoaded(), "Cart page not loaded");
-        Assert.assertTrue(cartPage.isItemPresent("Sauce Labs Backpack"), "Item not present in cart");
-    }
 
+        Assert.assertTrue(cartPage.isLoaded());
+        Assert.assertTrue(cartPage.isItemPresent("Sauce Labs Backpack"));
+    }
 
     @Test
     public void cart_shouldRemoveItem() {
-        InventoryPage inventoryPage = new InventoryPage(driver);
+
         inventoryPage.addToCart("Sauce Labs Backpack");
 
         CartPage cartPage = inventoryPage.goToCart();
-        Assert.assertTrue(cartPage.isItemPresent("Sauce Labs Backpack"), "Item not present before remove");
 
         cartPage.removeItem("Sauce Labs Backpack");
-        Assert.assertFalse(cartPage.isItemPresent("Sauce Labs Backpack"), "Item still present after remove");
+
+        Assert.assertFalse(
+                cartPage.isItemPresent("Sauce Labs Backpack")
+        );
+    }
+
+    @Test
+    public void cart_shouldDisplayCorrectItemCount() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        Assert.assertEquals(
+                cartPage.getCartItemCount(),
+                1
+        );
+    }
+
+    @Test
+    public void cart_shouldDisplayCorrectProductName() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        Assert.assertEquals(
+                cartPage.getFirstItemName(),
+                "Sauce Labs Backpack"
+        );
+    }
+
+    @Test
+    public void cart_shouldDisplayCorrectPrice() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        Assert.assertEquals(
+                cartPage.getFirstItemPrice(),
+                "$29.99"
+        );
+    }
+
+    @Test
+    public void cart_continueShopping_shouldNavigateToInventory() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        InventoryPage inventory = cartPage.continueShopping();
+
+        Assert.assertTrue(
+                inventory.isLoaded()
+        );
     }
 }

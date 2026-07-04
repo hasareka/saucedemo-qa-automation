@@ -17,47 +17,111 @@ public class LoginTests extends BaseTest {
 
     @Test
     public void login_standardUser_shouldNavigateToInventory() {
-        loginPage.enterUsername("standard_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
 
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "standard_user login failed");
+        loginPage.login("standard_user", "secret_sauce");
+
+        Assert.assertTrue(
+                loginPage.isOnInventoryPage(),
+                "Standard user should be redirected to the Inventory page."
+        );
     }
 
     @Test
     public void login_lockedOutUser_shouldShowLockedOutError() {
-        loginPage.enterUsername("locked_out_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
 
-        Assert.assertTrue(loginPage.getErrorMessage().toLowerCase().contains("locked out"),
-                "Locked out error message not shown");
+        loginPage.login("locked_out_user", "secret_sauce");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Sorry, this user has been locked out."
+        );
     }
 
     @Test
     public void login_performanceGlitchUser_shouldNavigateToInventory() {
-        loginPage.enterUsername("performance_glitch_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
 
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "performance_glitch_user login failed");
+        loginPage.login("performance_glitch_user", "secret_sauce");
+
+        Assert.assertTrue(
+                loginPage.isOnInventoryPage(),
+                "Performance glitch user should be redirected to the Inventory page."
+        );
     }
 
     @Test
     public void login_problemUser_shouldNavigateToInventory() {
-        loginPage.enterUsername("problem_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
 
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "problem_user login failed");
+        loginPage.login("problem_user", "secret_sauce");
+
+        Assert.assertTrue(
+                loginPage.isOnInventoryPage(),
+                "Problem user should be redirected to the Inventory page."
+        );
     }
 
     @Test
     public void login_visualUser_shouldNavigateToInventory() {
-        loginPage.enterUsername("visual_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
 
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "visual_user login failed");
+        loginPage.login("visual_user", "secret_sauce");
+
+        Assert.assertTrue(
+                loginPage.isOnInventoryPage(),
+                "Visual user should be redirected to the Inventory page."
+        );
+    }
+
+    @Test
+    public void login_invalidUsername_shouldShowErrorMessage() {
+
+        loginPage.login("invalid_user", "secret_sauce");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Username and password do not match any user in this service"
+        );
+    }
+
+    @Test
+    public void login_invalidPassword_shouldShowErrorMessage() {
+
+        loginPage.login("standard_user", "wrong_password");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Username and password do not match any user in this service"
+        );
+    }
+
+    @Test
+    public void login_emptyUsername_shouldShowUsernameRequiredMessage() {
+
+        loginPage.login("", "secret_sauce");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Username is required"
+        );
+    }
+
+    @Test
+    public void login_emptyPassword_shouldShowPasswordRequiredMessage() {
+
+        loginPage.login("standard_user", "");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Password is required"
+        );
+    }
+
+    @Test
+    public void login_emptyUsernameAndPassword_shouldShowUsernameRequiredMessage() {
+
+        loginPage.login("", "");
+
+        Assert.assertEquals(
+                loginPage.getErrorMessage(),
+                "Epic sadface: Username is required"
+        );
     }
 }

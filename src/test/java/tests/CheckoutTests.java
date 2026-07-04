@@ -7,47 +7,162 @@ import pages.*;
 
 public class CheckoutTests extends BaseTest {
 
+    private InventoryPage inventoryPage;
+
     @BeforeMethod
     public void loginToInventory() {
+
         driver.get("https://www.saucedemo.com/");
+
         LoginPage loginPage = new LoginPage(driver);
-        loginPage.enterUsername("standard_user");
-        loginPage.enterPassword("secret_sauce");
-        loginPage.clickLogin();
-        Assert.assertTrue(loginPage.isOnInventoryPage(), "Login failed in setup");
+        loginPage.login("standard_user", "secret_sauce");
+
+        Assert.assertTrue(
+                loginPage.isOnInventoryPage(),
+                "Login failed in setup."
+        );
+
+        inventoryPage = new InventoryPage(driver);
     }
 
     @Test
     public void checkout_shouldCompleteSuccessfully() {
-        InventoryPage inventoryPage = new InventoryPage(driver);
+
         inventoryPage.addToCart("Sauce Labs Backpack");
 
         CartPage cartPage = inventoryPage.goToCart();
+
         CheckoutInfoPage infoPage = cartPage.checkout();
-        Assert.assertTrue(infoPage.isLoaded(), "Checkout info page not loaded");
 
-        infoPage.fillInfo("Test", "User", "12345");
-        CheckoutOverviewPage overviewPage = infoPage.clickContinue();
-        Assert.assertTrue(overviewPage.isLoaded(), "Overview page not loaded");
+        Assert.assertTrue(infoPage.isLoaded());
 
-        CheckoutCompletePage completePage = overviewPage.finish();
-        Assert.assertTrue(completePage.isLoaded(), "Complete page not loaded");
-        Assert.assertTrue(completePage.getHeaderText().toLowerCase().contains("thank you"),
-                "Thank you message not shown");
+        infoPage.fillInformation("Test", "User", "12345");
+
+        CheckoutOverviewPage overviewPage = infoPage.continueCheckout();
+
+        Assert.assertTrue(overviewPage.isLoaded());
+
+        CheckoutCompletePage completePage = overviewPage.finishCheckout();
+
+        Assert.assertTrue(completePage.isLoaded());
+
+        Assert.assertEquals(
+                completePage.getHeaderText(),
+                "Thank you for your order!"
+        );
     }
 
     @Test
     public void checkout_shouldShowErrorWhenFirstNameMissing() {
-        InventoryPage inventoryPage = new InventoryPage(driver);
+
         inventoryPage.addToCart("Sauce Labs Backpack");
 
         CartPage cartPage = inventoryPage.goToCart();
+
         CheckoutInfoPage infoPage = cartPage.checkout();
 
-        infoPage.fillInfo("", "User", "12345");
-        infoPage.clickContinue();
+        infoPage.fillInformation("", "User", "12345");
 
-        Assert.assertTrue(infoPage.getErrorMessage().toLowerCase().contains("first name"),
-                "First name validation error not shown");
+        infoPage.continueCheckout();
+
+        Assert.assertEquals(
+                infoPage.getErrorMessage(),
+                "Error: First Name is required"
+        );
+    }
+
+    @Test
+    public void checkout_shouldShowErrorWhenLastNameMissing() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        CheckoutInfoPage infoPage = cartPage.checkout();
+
+        infoPage.fillInformation("Test", "", "12345");
+
+        infoPage.continueCheckout();
+
+        Assert.assertEquals(
+                infoPage.getErrorMessage(),
+                "Error: Last Name is required"
+        );
+    }
+
+    @Test
+    public void checkout_shouldShowErrorWhenPostalCodeMissing() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        CheckoutInfoPage infoPage = cartPage.checkout();
+
+        infoPage.fillInformation("Test", "User", "");
+
+        infoPage.continueCheckout();
+
+        Assert.assertEquals(
+                infoPage.getErrorMessage(),
+                "Error: Postal Code is required"
+        );
+    }
+
+    @Test
+    public void checkout_cancelFromInformationPage_shouldReturnToCart() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        CheckoutInfoPage infoPage = cartPage.checkout();
+
+        CartPage returnedCartPage = infoPage.cancelCheckout();
+
+        Assert.assertTrue(
+                returnedCartPage.isLoaded(),
+                "Cart page should be displayed after cancelling checkout."
+        );
+    }
+
+    @Test
+    public void checkout_shouldDisplayOrderTotal() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        CheckoutInfoPage infoPage = cartPage.checkout();
+
+        infoPage.fillInformation("Test", "User", "12345");
+
+        CheckoutOverviewPage overviewPage = infoPage.continueCheckout();
+
+        Assert.assertTrue(
+                overviewPage.getTotalText().contains("Total")
+        );
+    }
+
+    @Test
+    public void checkout_backToProducts_shouldNavigateToInventory() {
+
+        inventoryPage.addToCart("Sauce Labs Backpack");
+
+        CartPage cartPage = inventoryPage.goToCart();
+
+        CheckoutInfoPage infoPage = cartPage.checkout();
+
+        infoPage.fillInformation("Test", "User", "12345");
+
+        CheckoutOverviewPage overviewPage = infoPage.continueCheckout();
+
+        CheckoutCompletePage completePage = overviewPage.finishCheckout();
+
+        InventoryPage inventory = completePage.backToProducts();
+
+        Assert.assertTrue(
+                inventory.isLoaded()
+        );
     }
 }
