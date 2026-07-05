@@ -6,6 +6,10 @@ import org.testng.annotations.Test;
 import pages.CartPage;
 import pages.InventoryPage;
 import pages.LoginPage;
+import org.testng.annotations.Listeners;
+import utils.TestListener;
+
+@Listeners(TestListener.class)
 
 public class CartTests extends BaseTest {
 

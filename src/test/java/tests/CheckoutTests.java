@@ -4,6 +4,10 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.*;
+import org.testng.annotations.Listeners;
+import utils.TestListener;
+
+@Listeners(TestListener.class)
 
 public class CheckoutTests extends BaseTest {
 

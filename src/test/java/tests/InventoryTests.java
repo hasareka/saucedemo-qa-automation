@@ -5,7 +5,10 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import pages.InventoryPage;
 import pages.LoginPage;
+import org.testng.annotations.Listeners;
+import utils.TestListener;
 
+@Listeners(TestListener.class)
 public class InventoryTests extends BaseTest {
 
     private InventoryPage inventoryPage;
